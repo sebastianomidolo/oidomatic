@@ -1,0 +1,18 @@
+<h1>Listing bib_entries</h1>
+
+<table>
+  <tr>
+  </tr>
+
+<% @bib_entries.each do |bib_entry| %>
+  <tr>
+    <td><%= link_to 'Show', bib_entry %></td>
+    <td><%= link_to 'Edit', edit_bib_entry_path(bib_entry) %></td>
+    <td><%= link_to 'Destroy', bib_entry, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New bib_entry', new_bib_entry_path %>

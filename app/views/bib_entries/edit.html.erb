@@ -1,0 +1,12 @@
+<h1>Editing bib_entry</h1>
+
+<% form_for(@bib_entry) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.submit 'Update' %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @bib_entry %> |
+<%= link_to 'Back', bib_entries_path %>

@@ -1,0 +1,46 @@
+<%
+# lastmod 13 febbraio 2012
+# lastmod 21 dicembre 2011
+# lastmod  4 ottobre 2011
+%>
+<h2>Sistemi bibliotecari piemontesi interconnessi a Museo Torino tramite oidomatic</h2>
+
+<table>
+  <tr>
+  </tr>
+
+<% @entities.each do |entity| %>
+  <tr>
+    <%= content_tag(:td, link_to(entity.name,entity)) %>
+    <td><% link_to 'Show', entity %></td>
+    <td><% link_to 'Edit', edit_entity_path(entity) %></td>
+    <td><% link_to 'Destroy', entity, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<hr/>
+
+<p>A titolo sperimentale, &egrave; possibile installare l'estensione per Firefox
+<a href="https://addons.mozilla.org/it/firefox/addon/greasemonkey/">Greasemonkey</a> e successivamente l'<a href="http://456.selfip.net/mt/xref.user.js">estensione oidomatic</a>
+che permette la visualizzazione, all'interno della scheda bibliografica dei singoli opac,
+dei collegamenti agli altri opac in possesso della stessa opera.
+</p>
+Vedi ad esempio la scheda bibliografica di
+<a href="http://oidomatic.webhop.net/bib_entries/635">Dalla citt&agrave; razionale alla crisi
+dello stato d'antico regime, 1730-1798<a/>
+
+<hr/>
+Nota: per l'importazione massiva degli identificativi di MT e'
+stato utilizzato questo file:
+<a href="/bids_mt.xls">bids_mt.xls</a>.
+<br/>Per gli aggiornamenti conviene utilizzare un file con formato identico.
+
+
+
+
+
+
+

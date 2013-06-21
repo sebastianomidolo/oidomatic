@@ -1,0 +1,17 @@
+<%
+# lastmod  4 gennaio 2012
+# lastmod 21 dicembre 2011
+%>
+
+<%= content_tag(:h3, "links a cataloghi per oid #{@bib_entry.source_oid}") %>
+
+<ol>
+<% @bib_entry.localizzazioni(:all).each do |l| %>
+  <%=
+    bib = l[:biblioteche].size==0 ? '' : " (#{l[:biblioteche].join(', ')})"
+    content_tag(:li, link_to(l[:label], l[:href]) + bib)
+  %>
+<% end %>
+</ol>
+
+<%= link_to 'Home page', entities_path %>

@@ -1,0 +1,16 @@
+<%
+# lastmod  3 gennaio 2012
+# lastmod 21 dicembre 2011
+%>
+
+<%= content_tag(:h2, "#{@entity.name} (#{@entity.abes.size} schede)") %>
+
+<ul>
+<% @entity.abes.each do |a| %>
+ <%= content_tag(:li, link_to(a.bib_entry.source_oid, a.bib_entry)) %>
+<% end %>
+</ul>
+
+
+
+<%= link_to 'Home page', entities_path %>
