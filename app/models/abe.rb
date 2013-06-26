@@ -6,7 +6,10 @@
 # lastmod 15 dicembre 2011
 
 class Abe < ActiveRecord::Base
-  set_primary_keys :bib_entry_id,:entity_id
+  self.primary_keys=[:bib_entry_id,:entity_id]
+  attr_accessible :bib_entry_id,:entity_id
+  
+
   belongs_to :bib_entry
   belongs_to :entity
   has_many :items, :foreign_key=>[:bib_entry_id,:entity_id]

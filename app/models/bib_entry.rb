@@ -15,6 +15,7 @@
 # lastmod 15 dicembre 2011
 
 class BibEntry < ActiveRecord::Base
+  attr_accessible :source_oid, :entity_id, :oid, :sbn_id
   belongs_to :entity
   has_many :abes
   has_many :items
@@ -200,8 +201,8 @@ class BibEntry < ActiveRecord::Base
           # puts "data per id #{e.id}\n#{data}\n"
           puts "cerco abe per bib_entry #{be.id} e entity #{e.id}"
           if c1==true and c2==false
-            puts "questo record non esiste su #{e.name}"
-            Abe.delete([be.id,e.id])
+            puts "questo record (#{[be.id,e.id]}) non esiste su #{e.name}"
+            Abe.delete([[be.id,e.id]])
           end
           if c1==false and c2==true
             puts "questo record esiste su #{e.name}"

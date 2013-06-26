@@ -76,12 +76,12 @@ class Entity < ActiveRecord::Base
 
   def Entity.fetch_web_page(url) 
     puts "fetching url '#{url}'"
-    tempdir = File.join(RAILS_ROOT, 'tmp')
+    tempdir = File.join(Rails.root, 'tmp')
     tf = Tempfile.new("webpage",tempdir)
     html_file=tf.path
 
     uag='Mozilla/4.0 (MSIE 6.0; Windows NT 5.1)'
-    comando = "/usr/local/bin/wget  --user-agent='#{uag}' -o /dev/null -O #{html_file} \"#{url}\""
+    comando = "/usr/bin/wget  --user-agent='#{uag}' -o /dev/null -O #{html_file} \"#{url}\""
     # puts comando
     Kernel.system(comando)
     fd = File.open(html_file)

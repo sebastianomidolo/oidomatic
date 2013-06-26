@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # lastmod 30 ottobre 2012  - modifica a mtget
 # lastmod 25 gennaio 2012  - def bid_and_source_oid_write
 # lastmod 20 gennaio 2012
@@ -25,11 +26,11 @@ class GetinfoController < ApplicationController
       end
     end
 
-    case params[:qm]
-    when 'js'
-      render :partial=>"getinfo/gti"
-    else
-      render :text=>"richiesta da url #{@url} - @bib_entry: #{@bib_entry.inspect}"
+    respond_to do |format|
+      format.js
+      format.html {
+        render :text=>'';
+      }
     end
   end
   
@@ -164,5 +165,32 @@ class GetinfoController < ApplicationController
     render :json=>resp.to_json
   end
 
+  # http://bctdoc.selfip.net/issues/49
+  def proxy_for_mt
+    oid=params[:oid]
+    type=params[:type]
+
+    resp={}
+    case type
+    when 'bid'
+      @bib_entry=BibEntry.find(:first,:conditions=>{:sbn_id=>true,:source_oid=>oid})
+      resp[:bid]=oid
+    when 'mt'
+      @bib_entry=BibEntry.find(:first,:conditions=>{:entity_id=>0,:source_oid=>oid})
+      resp[:mt]=oid
+    when 'poli_id'
+      @bib_entry=BibEntry.find(:first,:conditions=>{:entity_id=>4,:source_oid=>oid})
+      resp[:poli_id]=oid
+    end
+
+    if @bib_entry.nil?
+      resp[:status]='404 NOT FOUND'
+    else
+      resp[:status]='200 OK'
+      # Esclude Entities 0 (museo torino) e 7 (museo torino digitalizzati)
+      resp[:consistenze]=@bib_entry.localizzazioni(:all,[0,7])
+    end
+    render :json=>resp.to_json
+  end
 
 end

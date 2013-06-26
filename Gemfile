@@ -38,3 +38,5 @@ end
 # gem 'debugger'
 
 gem "composite_primary_keys", "~> 5.0.13"
+
+gem 'nokogiri'
