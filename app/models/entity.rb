@@ -20,6 +20,12 @@ class Entity < ActiveRecord::Base
     "http://#{baseurl}/#{itempath}"
   end
 
+  def last_entries(max=10)
+    sql=%Q{select a.* from abes a left join bib_entries be on(a.bib_entry_id=be.id
+    and a.entity_id=be.entity_id) where a.entity_id = #{self.id} order by oid desc limit #{max};}
+    Abe.find_by_sql(sql)
+  end
+
   def add_libraries(names)
     libs=[]
     names.each do |n|
@@ -42,15 +48,21 @@ class Entity < ActiveRecord::Base
     self.itempath_template.split('__%%__').each do |p|
       theurl.slice!(p)
     end
-    url==theurl ? nil : theurl
+    url = (url==theurl ? nil : theurl)
+    return nil if url.nil?
+    # url.split('#').first
+    url.split(/\&|\/|#|\?/).first
   end
 
-
   def Entity.trova_da_url(url)
+    # puts "url: #{url}"
     return nil if url.blank?
     Entity.all.each do |e|
-      next if e.baseurl.nil?
-      return e if !(/#{e.baseurl}/ =~ url).nil?
+      next if e.baseurl.nil? or (/#{e.baseurl}/ =~ url).nil?
+      source_oid=e.extract_oid_from_url(url)
+      # puts "source_oid: #{source_oid}"
+      # return e if !(/#{e.baseurl}/ =~ url).nil?
+      return e if !source_oid.blank?
     end
     nil
   end
@@ -63,6 +75,8 @@ class Entity < ActiveRecord::Base
   end
 
   # Alternativa a fetch_web_page (usa Net::HTTP)
+  # NB: evitare di utilizzare in quanto al momento non tratta eventuali redirect:
+  # meglio usare fetch_web_page
   def Entity.get_url(url)
     x=url.split('/')
     return nil if x[0]!='http:'
@@ -82,7 +96,7 @@ class Entity < ActiveRecord::Base
 
     uag='Mozilla/4.0 (MSIE 6.0; Windows NT 5.1)'
     comando = "/usr/bin/wget  --user-agent='#{uag}' -o /dev/null -O #{html_file} \"#{url}\""
-    # puts comando
+    puts comando
     Kernel.system(comando)
     fd = File.open(html_file)
     data = fd.read

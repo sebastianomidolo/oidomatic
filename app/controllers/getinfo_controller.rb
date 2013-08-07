@@ -25,9 +25,16 @@ class GetinfoController < ApplicationController
         @bib_entry=BibEntry.trovabid(@bid)
       end
     end
+    render :text=>'not found', :content_type=>'text' and return if @bib_entry.nil?
 
     respond_to do |format|
       format.js
+      format.json {
+        render :json=>@bib_entry.localizzazioni(:all, [@entity.id])
+      }
+      format.xml {
+        render :xml=>@bib_entry.localizzazioni(:all, [@entity.id])
+      }
       format.html {
         render :text=>'';
       }

@@ -1,17 +1,24 @@
 <%
+# lastmod 19 luglio 2013
 # lastmod  4 gennaio 2012
 # lastmod 21 dicembre 2011
 %>
 
-<%= content_tag(:h3, "links a cataloghi per oid #{@bib_entry.source_oid}") %>
+<%= content_tag(:h3, "Info su oid #{@bib_entry.source_oid}") %>
 
 <ol>
 <% @bib_entry.localizzazioni(:all).each do |l| %>
   <%=
     bib = l[:biblioteche].size==0 ? '' : " (#{l[:biblioteche].join(', ')})"
-    content_tag(:li, link_to(l[:label], l[:href]) + bib)
+    jsonlink=link_to('[JSON]', getinfo_path(:format=>:json,:href=>l[:href]))
+    xmllink=link_to('[XML]', getinfo_path(:format=>:xml,:href=>l[:href]))
+    content_tag(:li, link_to(l[:label], l[:href]) + bib + " - " + jsonlink + " - " + xmllink)
   %>
 <% end %>
 </ol>
 
+<hr/>
 <%= link_to 'Home page', entities_path %>
+<hr/>
+<%= link_to('Allinea', allinea_bib_entry_path) if request.remote_ip=='158.102.56.204' %>
+

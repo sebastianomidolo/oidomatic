@@ -1,3 +1,4 @@
+-- lastmod  9 luglio 2013
 -- lastmod 11 febbraio 2012
 -- lastmod 10 febbraio 2012
 -- lastmod 19 gennaio 2012
@@ -48,15 +49,9 @@ set procedures='
    r = (/Dove lo trovi/ =~ s)
    r.nil? ? false : true
  end
- def disabled_estrai_biblioteche(s,abe)
-  # puts %Q{In estrai_biblioteche per #{abe.entity.name} - bid="#{abe.bib_entry.sbnbid}" - bib_entry #{abe.bib_entry.id} s.size=#{s.size}}
-  doc=Hpricot(s)
-  # puts doc.class
-  # t=doc.search(%Q{//div[@id="tabs"]})
-  t=doc.search(%Q{//ul[@class="paging"]})
-  # a=t.search("a").to_a.collect {|e| e.inner_html.strip}
-  a=t.search("//a[@class=linkmappa]").to_a.collect {|e| e.inner_html.strip}
-  # a.shift
+ def estrai_biblioteche(s,abe)
+  doc=Nokogiri::HTML(s)
+  a=doc.search(".paging").search(".linkmappa").to_a.collect {|x| x.text}
   a.uniq
  end
 '
@@ -70,17 +65,14 @@ set procedures='
    r.nil? ? false : true
  end
  def trovato(s)
-   r = (/<div class="detail">/ =~ s)
-   r.nil? ? false : true
+   doc=Nokogiri::HTML(s)
+   size=doc.search("#details").size
+   size==1 ? true : false
  end
- def disabled_estrai_biblioteche(s,abe)
-  puts %Q{In estrai_biblioteche per #{abe.entity.name} - bid="#{abe.bib_entry.sbnbid}" - bib_entry #{abe.bib_entry.id} s.size=#{s.size}}
-  doc=Hpricot(s)
-  puts doc.class
-  t=doc.search(%Q{//div[@id="tab-items"]})
-  a=t.search("a").to_a.collect {|e| e.inner_html.strip.split(" - ").last}
+ def estrai_biblioteche(s,abe)
+  doc=Nokogiri::HTML(s)
+  a=doc.search("#items").search("a").to_a.collect {|x| x.text.strip.split(" - ").last}
   a.uniq
-  #  puts a.inspect
  end
  def ricavaoid_dabid(bid)
   return nil if bid.blank?
@@ -94,7 +86,7 @@ set procedures='
 where id=2;
 
 
--- cavour.cilea.it
+-- cavour.cilea.it unito
 update entities
 set procedures='
  def nontrovato(s)
@@ -106,12 +98,9 @@ set procedures='
    r = (/unimarc/ =~ s)
    r.nil? ? false : true
  end
- def disabled_estrai_biblioteche(s,abe)
-  puts %Q{In estrai_biblioteche per #{abe.entity.name} - bid="#{abe.bib_entry.sbnbid}" - bib_entry #{abe.bib_entry.id} s.size=#{s.size}}
-  doc=Hpricot(s)
-  # puts doc.class
-  t=doc.search(%Q{//span[@class="testolocalizzazioni"]})
-  a=t.search("a").to_a.collect {|e| e.inner_html.strip.gsub("&#039;", %Q{"})}
+ def estrai_biblioteche(s,abe)
+  doc=Nokogiri::HTML(s)
+  a=doc.search(".testolocalizzazioni").search("a").to_a.collect {|x| x.text.gsub("\n","").strip}
   a.delete_if {|x| /Tutte/=~x}
   a.uniq
  end
@@ -129,24 +118,64 @@ set procedures='
    r = (/Formato completo del record/ =~ s)
    r.nil? ? false : true
  end
- def disabled_estrai_biblioteche(s,abe)
-  # puts "Non funziona ancora per polito"
-  puts %Q{In estrai_biblioteche per #{abe.entity.name} - bid="#{abe.bib_entry.sbnbid}" - bib_entry #{abe.bib_entry.id} s.size=#{s.size}}
-  doc=Hpricot(s)
-  puts doc.class
-  
-  ar=[]
-  doc.search("td[text()*=Poss. da]").each do |x|
-     x=x.parent.search("a")
-     next if x.nil?
-     ar << x.inner_text.strip
-  end
-  # puts "ar: #{ar.inspect}"
-  ar
+ def estrai_biblioteche(s,abe)
+   doc=Nokogiri::HTML(s)
+   a=doc.search(".td1").to_a.collect {|x| t=x.text.strip; n=x.parent.children[2].text.strip if (t =~ /^Poss/); n}
+   a.compact.uniq
  end
 '
 where id=4;
 
+
+
+update entities
+set procedures='
+ def nontrovato(s)
+   doc=Nokogiri::HTML(s)
+   f=doc.search("#form1")[0]
+   return false if f.nil?
+   (f["action"] == "/Opac/RicercaBase.aspx") ? true : false
+ end
+ def trovato(s)
+   puts "sbam page size: #{s.size}"
+   doc=Nokogiri::HTML(s)
+   f=doc.search("#form1")[0]
+   return false if f.nil?
+   puts %Q{in trovato sbam: #{f["action"]}}
+   (f["action"].split("?").first == "/Opac/EsameTitolo.aspx") ? true : false
+ end
+ def ricavabid_daoid(oid)
+  return nil if oid.blank?
+  data=Entity.fetch_web_page("http://sbam.erasmo.it/Opac/EsameTitolo.aspx?IDTIT=#{oid}")
+  doc=Nokogiri::HTML(data)
+  doc.search("#lbBid").text
+ end
+ def estrai_biblioteche(s,abe)
+   doc=Nokogiri::HTML(s)
+   a=doc.search("#gvSbnLocalizza").search("tr").to_a.collect {|x| x.search("span")[0].text}
+   a.uniq
+ end
+'
+where id=5;
+
+
+update entities
+set procedures='
+ def nontrovato(s)
+   doc=Nokogiri::HTML(s)
+   false
+ end
+ def trovato(s)
+   doc=Nokogiri::HTML(s)
+   x=doc.search("h3").to_a.collect {|x| x.text if x.text=~/Dublin/}.compact.size
+   x>0 ? true : false
+ end
+ def ricavabid_daoid(oid)
+  return nil if oid.blank?
+  nil
+ end
+'
+where id=8;
 
 
 -- biella - decommentare questa insert per riattivare biella

@@ -186,8 +186,8 @@ class BibEntry < ActiveRecord::Base
         # prima della "eval" (vedi esempio in abe.rb)
         if !e.procedures.blank?
           eval(e.procedures)
-          # data=Entity.fetch_web_page(url)
-          data=Entity.get_url(url)
+          data=Entity.fetch_web_page(url)
+          # data=Entity.get_url(url) ; evitare di utilizzare, non tratta la redirezione
           if data.nil?
             puts "pagina vuota da #{url}"
             next
@@ -293,10 +293,10 @@ class BibEntry < ActiveRecord::Base
   def riallinea_entry
     if self.entity.nil?
       self.ricava_source_oids_da_bid
-      puts self.inspect
+      # puts self.inspect
     else
       self.ricava_bid_da_source_oid
-      puts self.inspect      
+      # puts self.inspect      
     end
     self.harvest
     self.aggiorna_lista_biblioteche

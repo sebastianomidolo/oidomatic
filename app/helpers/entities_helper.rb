@@ -4,6 +4,7 @@ module EntitiesHelper
   def entities_sistemi_attivi
     r=[]
     Entity.all(:order=>'id').each do |e|
+      next if [12].include?(e.id)
       td=[]
       td << content_tag(:td, e.name)
       r << content_tag(:tr, td.join.html_safe)

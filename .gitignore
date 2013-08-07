@@ -20,6 +20,8 @@ public/index.html
 
 config/database.yml
 
+/data/*
+
 lavagna.txt
 
 
