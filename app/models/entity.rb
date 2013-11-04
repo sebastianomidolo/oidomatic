@@ -20,9 +20,22 @@ class Entity < ActiveRecord::Base
     "http://#{baseurl}/#{itempath}"
   end
 
-  def last_entries(max=10)
-    sql=%Q{select a.* from abes a left join bib_entries be on(a.bib_entry_id=be.id
-    and a.entity_id=be.entity_id) where a.entity_id = #{self.id} order by oid desc limit #{max};}
+  def random_entries(max=10)
+    # sql=%Q{select a.* from abes a left join bib_entries be on(a.bib_entry_id=be.id
+    # and a.entity_id=be.entity_id) where a.entity_id = #{self.id} order by oid desc limit #{max};}
+    if self.sbn
+      sql=%Q{select s1.id as bib_entry_id, #{self.id} as entity_id from (select be.oid,be.id from abes a
+left join bib_entries be on(a.bib_entry_id=be.id) where be.sbn_id) as s1 JOIN (select
+be.oid,be.id from abes a left join bib_entries be
+on(a.bib_entry_id=be.id) where not be.sbn_id) as s2 using(oid) order by random() limit #{max};}
+    else
+      sql=%Q{select s1.id as bib_entry_id, #{self.id} as entity_id from (select be.oid,be.id from abes a
+left join bib_entries be on(a.bib_entry_id=be.id and
+a.entity_id=be.entity_id) where a.entity_id=#{self.id}) as s1 JOIN (select
+be.oid,be.id from abes a left join bib_entries be
+on(a.bib_entry_id=be.id and a.entity_id=be.entity_id) where
+a.entity_id!=#{self.id}) as s2 using(oid) order by random() limit #{max};}
+    end
     Abe.find_by_sql(sql)
   end
 

@@ -1,13 +1,13 @@
 <%
-# lastmod 16 luglio 2013 - uso last_entries
+# lastmod  8 agosto 2013 - uso random_entries
 # lastmod  3 gennaio 2012
 # lastmod 21 dicembre 2011
 %>
 
-<%= content_tag(:h2, "#{@entity.name} (#{@entity.abes.size} schede)") %>
+<%= content_tag(:h2, "#{@entity.name}") %>
 
 <ul>
-<% @entity.last_entries(40).each do |a| %>
+<% @entity.random_entries(40).each do |a| %>
  <%= content_tag(:li, link_to(a.bib_entry.source_oid, a.bib_entry)) %>
 <% end %>
 </ul>
